@@ -1,0 +1,31 @@
+{
+  "name": "mp3-frames",
+  "version": "0.0.1",
+  "description": "A simple web app for viewing MP3 frames",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DanwareCreations/Mp3Frames.git"
+  },
+  "main": "index.js",
+  "browser": true,
+  "keywords": [
+    "mp3",
+    "audio",
+    "mpeg",
+    "codec"
+  ],
+  "author": "Dan Vicarel",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/DanwareCreations/Mp3Frames/issues"
+  },
+  "homepage": "https://github.com/DanwareCreations/Mp3Frames#readme",
+  "devDependencies": {
+    "@babel/cli": "^7.1.2",
+    "@babel/core": "^7.1.2",
+    "eslint": "^5.8.0",
+    "webpack": "^4.24.0"
+  },
+  "dependencies": {}
+}
