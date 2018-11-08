@@ -9,21 +9,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
     let _loadingIcon;
 
+    let _ddlDisplayFields;
     let _fieldsShown = {
-        version: true,
-        layer: true,
+        version: false,
+        layer: false,
         protected: false,
-        bitRate: true,
-        sampleRate: true,
+        bitRate: false,
+        sampleRate: false,
         padding: false,
         private: false,
-        channelMode: true,
+        channelMode: false,
         copyright: false,
         original: false,
         emphasis: false,
     }
 
-    const _sectionDescs = {
+    const _fieldDescs = {
         "Sync": "This is what 'Sync' means.",
         "MPEG version ID": "This is what 'MPEG version ID' means",
         "Layer": "This is what 'Layer' means",
@@ -82,22 +83,49 @@ document.addEventListener("DOMContentLoaded", () => {
             });
 
             // Adjust visible columns as user changes display options
-            const dllDispFields = document.getElementById("display-fields");
-            dllDispFields.addEventListener("change", e=> {
-                for (let f = 0; f < dllDispFields.length; ++f) {
-                    const opt = dllDispFields[f];
-                    if (opt.selected !== _fieldsShown[opt.value]) {
-                        _fieldsShown[opt.value] = opt.selected;
-                        const cells = Array.from(document.getElementsByClassName(`mp3-${opt.value}`));
-                        for (let c = 0; c < cells.length; ++c)
-                            cells[c].hidden = !opt.selected;
-                    }
-                }
+            _ddlDisplayFields = document.getElementById("display-fields");
+            _ddlDisplayFields.addEventListener("change", e => {
+                this.resetDisplayedFields(_ddlDisplayFields);
             });
+
+            // Add click listeners to the Restore Defaults button
+            const btnDefaults = document.getElementById("btn-defaults");
+            btnDefaults.addEventListener("click", e => {
+                this.restoreDefaults();
+                this.resetDisplayedFields();
+            });
+
+            // Toggle the fields that are displayed by default
+            this.restoreDefaults();
+            this.resetDisplayedFields();
 
             // Get some other important UI elements
             _fileCtrls  = document.getElementById("file-ctrls");
             _loadingIcon = document.getElementById("loading-icon");
+        }
+        restoreDefaults() {
+            _ddlDisplayFields.namedItem("opt-version").selected = true;
+            _ddlDisplayFields.namedItem("opt-layer").selected = true;
+            _ddlDisplayFields.namedItem("opt-protected").selected = false;
+            _ddlDisplayFields.namedItem("opt-bitRate").selected = true;
+            _ddlDisplayFields.namedItem("opt-sampleRate").selected = true;
+            _ddlDisplayFields.namedItem("opt-padding").selected = false;
+            _ddlDisplayFields.namedItem("opt-private").selected = false;
+            _ddlDisplayFields.namedItem("opt-channelMode").selected = true;
+            _ddlDisplayFields.namedItem("opt-copyright").selected = false;
+            _ddlDisplayFields.namedItem("opt-original").selected = false;
+            _ddlDisplayFields.namedItem("opt-emphasis").selected = false;
+        }
+        resetDisplayedFields() {
+            for (let f = 0; f < _ddlDisplayFields.length; ++f) {
+                const opt = _ddlDisplayFields[f];
+                if (opt.selected !== _fieldsShown[opt.value]) {
+                    _fieldsShown[opt.value] = opt.selected;
+                    const cells = Array.from(document.getElementsByClassName(`mp3-${opt.value}`));
+                    for (let c = 0; c < cells.length; ++c)
+                        cells[c].hidden = !opt.selected;
+                }
+            }
         }
         openMp3File(file, cb) {
             // Get the selected file
@@ -147,19 +175,19 @@ document.addEventListener("DOMContentLoaded", () => {
                     ++_frameNum;
 
                     // Build up the HTML for this MP3 Frame
-                    let sectionsHtml = "";
-                    sectionsHtml += getHeaderSectionHtml("text-white bg-success", "Sync", _sectionDescs["Sync"], "Synchronized", 0b11111111111);
-                    sectionsHtml += getHeaderSectionHtml("text-white bg-info", "MPEG version ID", _sectionDescs["MPEG version ID"], hdrStrs.version, frame.header.version);
-                    sectionsHtml += getHeaderSectionHtml("text-white bg-warning", "Layer", _sectionDescs["Layer"], hdrStrs.layer, frame.header.layer);
-                    sectionsHtml += getHeaderSectionHtml("bg-light", "Protection bit", _sectionDescs["Protection bit"], hdrStrs.protected, frame.header.protected);
-                    sectionsHtml += getHeaderSectionHtml("text-white bg-danger", "Bitrate", _sectionDescs["Bitrate"], hdrStrs.bitRate, frame.header.bitRate.index);
-                    sectionsHtml += getHeaderSectionHtml("text-white bg-success", "Sample rate (frequency)", _sectionDescs["Sample rate (frequency)"], hdrStrs.sampleRate, frame.header.sampleRate.index);
-                    sectionsHtml += getHeaderSectionHtml("bg-light", "Padding bit", _sectionDescs["Padding bit"], hdrStrs.padding, frame.header.padding);
-                    sectionsHtml += getHeaderSectionHtml("bg-light", "Private bit", _sectionDescs["Private bit"], hdrStrs.private, frame.header.private);
-                    sectionsHtml += getHeaderSectionHtml("text-white bg-info", "Channel mode", _sectionDescs["Channel mode"], hdrStrs.channelMode, frame.header.channelMode);
-                    sectionsHtml += getHeaderSectionHtml("bg-light", "Copyright bit", _sectionDescs["Copyright bit"], hdrStrs.copyright, frame.header.copyright);
-                    sectionsHtml += getHeaderSectionHtml("bg-light", "Home (original bit)", _sectionDescs["Home (original bit)"], hdrStrs.original, frame.header.original);
-                    sectionsHtml += getHeaderSectionHtml("text-white bg-warning", "Emphasis", _sectionDescs["Emphasis"], hdrStrs.emphasis, frame.header.emphasis);
+                    let fieldsHtml = "";
+                    fieldsHtml += getHeaderFieldHtml("text-white bg-success", "Sync", _fieldDescs["Sync"], "Synchronized", 0b11111111111);
+                    fieldsHtml += getHeaderFieldHtml("text-white bg-info", "MPEG version ID", _fieldDescs["MPEG version ID"], hdrStrs.version, frame.header.version);
+                    fieldsHtml += getHeaderFieldHtml("text-white bg-warning", "Layer", _fieldDescs["Layer"], hdrStrs.layer, frame.header.layer);
+                    fieldsHtml += getHeaderFieldHtml("bg-light", "Protection bit", _fieldDescs["Protection bit"], hdrStrs.protected, frame.header.protected);
+                    fieldsHtml += getHeaderFieldHtml("text-white bg-danger", "Bitrate", _fieldDescs["Bitrate"], hdrStrs.bitRate, frame.header.bitRate.index);
+                    fieldsHtml += getHeaderFieldHtml("text-white bg-success", "Sample rate (frequency)", _fieldDescs["Sample rate (frequency)"], hdrStrs.sampleRate, frame.header.sampleRate.index);
+                    fieldsHtml += getHeaderFieldHtml("bg-light", "Padding bit", _fieldDescs["Padding bit"], hdrStrs.padding, frame.header.padding);
+                    fieldsHtml += getHeaderFieldHtml("bg-light", "Private bit", _fieldDescs["Private bit"], hdrStrs.private, frame.header.private);
+                    fieldsHtml += getHeaderFieldHtml("text-white bg-info", "Channel mode", _fieldDescs["Channel mode"], hdrStrs.channelMode, frame.header.channelMode);
+                    fieldsHtml += getHeaderFieldHtml("bg-light", "Copyright bit", _fieldDescs["Copyright bit"], hdrStrs.copyright, frame.header.copyright);
+                    fieldsHtml += getHeaderFieldHtml("bg-light", "Home (original bit)", _fieldDescs["Home (original bit)"], hdrStrs.original, frame.header.original);
+                    fieldsHtml += getHeaderFieldHtml("text-white bg-warning", "Emphasis", _fieldDescs["Emphasis"], hdrStrs.emphasis, frame.header.emphasis);
                     const frameHtml = `
                         <tr class="mp3-frame-result" data-controls="frame-${_frameNum}">
                             <td>#${_frameNum}</td>
@@ -178,7 +206,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         <tr>
                             <td colspan="6" class="p-0">
                                 <div id="frame-${_frameNum}" class="collapse row justify-content-center p-4">
-                                    ${sectionsHtml}
+                                    ${fieldsHtml}
                                 </div>
                             </td>
                         </tr>
@@ -193,12 +221,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 _framesTbl.tBodies[0].innerHTML += html;
                 _filePos += start;
             }
-            function getHeaderSectionHtml(style, sectionName, sectionDesc, meaning, value) {
+            function getHeaderFieldHtml(style, fieldName, fieldDesc, meaning, value) {
                 return `
                     <div class="card ${style}">
                         <div class="card-header">
-                            ${sectionName}
-                            <a tabindex="0" role="button" class="${style} float-right" data-toggle="popover" title="${sectionName}" data-content="${sectionDesc}">
+                            ${fieldName}
+                            <a tabindex="0" role="button" class="${style} float-right" data-toggle="popover" title="${fieldName}" data-content="${fieldDesc}">
                                 <i class="fas fa-info-circle ml-2"></i>
                             </a>
                         </div>

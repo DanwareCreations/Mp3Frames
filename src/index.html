@@ -56,7 +56,7 @@
                     <th scope="col" class="mp3-version" hidden>MPEG version ID</th>
                     <th scope="col" class="mp3-layer" hidden>Layer</th>
                     <th scope="col" class="mp3-protected" hidden>Protection bit</th>
-                    <th scope="col" class="mp3-bitrate" hidden>Bitrate</th>
+                    <th scope="col" class="mp3-bitRate" hidden>Bitrate</th>
                     <th scope="col" class="mp3-sampleRate" hidden>Sampe rate (frequency)</th>
                     <th scope="col" class="mp3-padding" hidden>Padding bit</th>
                     <th scope="col" class="mp3-private" hidden>Private bit</th>
@@ -91,27 +91,28 @@
 
             <!-- Display options -->
             <br/>
-            <h2>Display Options</h2>
+            <h2>Settings</h2>
             <form class="">
               <div class="form-row justify-content-center">
                 <div class="col">
                     <div class="form-group">
                         <label for="display-fields">Show these fields in the results table:</label>
-                        <select id="display-fields" class="custom-select" multiple>
-                          <option value="version" selected>MPEG version ID</option>
-                          <option value="layer" selected>Layer</option>
-                          <option value="protected">Protected bit</option>
-                          <option value="bitRate" selected>Bitrate</option>
-                          <option value="sampleRate" selected>Sample rate (frequency)</option>
-                          <option value="padding">Padding bit</option>
-                          <option value="private">Private bit</option>
-                          <option value="channelMode" selected>Channel mode</option>
-                          <option value="modeExtension">Mode extension</option>
-                          <option value="copyright">Copyright bit</option>
-                          <option value="original">Home (original bit)</option>
-                          <option value="emphasis">Emphasis</option>
+                        <select id="display-fields" class="custom-select mp3-no-scroll-select" multiple size="12">
+                          <option id="opt-version" value="version">MPEG version ID</option>
+                          <option id="opt-layer" value="layer">Layer</option>
+                          <option id="opt-protected" value="protected">Protected bit</option>
+                          <option id="opt-bitRate" value="bitRate">Bitrate</option>
+                          <option id="opt-sampleRate" value="sampleRate">Sample rate (frequency)</option>
+                          <option id="opt-padding" value="padding">Padding bit</option>
+                          <option id="opt-private" value="private">Private bit</option>
+                          <option id="opt-channelMode" value="channelMode">Channel mode</option>
+                          <option id="opt-modeExtension" value="modeExtension">Mode extension</option>
+                          <option id="opt-copyright" value="copyright">Copyright bit</option>
+                          <option id="opt-original" value="original">Home (original bit)</option>
+                          <option id="opt-emphasis" value="emphasis">Emphasis</option>
                         </select>
                     </div>
+                    <button type="button" id="btn-defaults" class="btn btn-outline-primary float-right">Restore defaults</button>
                 </div>
               </div>
             </form>
