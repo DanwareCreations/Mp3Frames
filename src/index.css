@@ -1,3 +1,6 @@
+body {
+    padding-top: 70px;
+}
 .mp3-frame-result {
     cursor: pointer;
 }
