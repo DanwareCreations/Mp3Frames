@@ -50,7 +50,7 @@ let Frame;
                              : (bits & 0b00000000000011111111000000000000) >> 12
             };
 
-            this.frameSize = 144 * this.bitRate / (this.sampleRate + (this.padding ? 1 : 0));
+            this.frameSize = Math.trunc(144 * 1000 * hdr.bitRate.value / hdr.sampleRate.value) + (hdr.padding ? 1 : 0);
         }
         static getBitrate(version, layer, bitrateIndex) {
             let bitrateArr = [];
