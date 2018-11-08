@@ -11,9 +11,7 @@
 
     <script defer src="https://use.fontawesome.com/releases/v5.5.0/js/all.js" integrity="sha384-GqVMZRt5Gn7tB9D9q7ONtcp4gtHIUEW/yG7h98J7IpE3kpi+srfFyyB/04OV6pG0" crossorigin="anonymous"></script>
   </head>
-  <body class="p-4">
-
-    <div class="container">
+  <body>
 
     <!-- Main navbar -->
     <header>
@@ -24,49 +22,100 @@
         </button>
         <div class="collapse navbar-collapse">
           <ul class="navbar-nav ml-auto">
+            <li class="nav-item">
+              <a href="#" class="nav-link"></a>
+              <a class="nav-link" data-toggle="collapse" href="#settings" role="button" aria-expanded="false" aria-controls="settings">
+                <i class="fas fa-cog"></i> Settings
+              </a>
+            </li>
           </ul>
         </div>
       </nav>
     </header>
 
-      <h1 class="display-1 text-center">MP3 Frames</h1>
-
-      <!-- File picker -->
+    <div class="container-fluid">
       <div class="row">
-        <div class="custom-file">
-          <input type="file" class="custom-file-input" id="file-input" data-mp3-frames="100">
-          <label class="custom-file-label" for="customFile">Choose MP3 file</label>
+        <div class="col p-5">
+
+            <h1 class="display-1 text-center">MP3 Frames</h1>
+
+            <!-- File picker -->
+            <div class="row">
+              <div class="custom-file">
+                <input type="file" class="custom-file-input" id="file-input" data-mp3-frames="100">
+                <label class="custom-file-label" for="customFile">Choose MP3 file</label>
+              </div>
+            </div>
+
+            <!-- List of loaded frames! -->
+            <br/>
+            <table id="frames" class="table" hidden>
+              <thead>
+                <tr>
+                  <th scope="col">Frame</th>
+                  <th scope="col" class="mp3-version">MPEG version ID</th>
+                  <th scope="col" class="mp3-layer">Layer</th>
+                  <th scope="col" class="mp3-protected" hidden>Protection bit</th>
+                  <th scope="col" class="mp3-bitrate">Bitrate</th>
+                  <th scope="col" class="mp3-sampleRate">Sampe rate (frequency)</th>
+                  <th scope="col" class="mp3-padding" hidden>Padding bit</th>
+                  <th scope="col" class="mp3-private" hidden>Private bit</th>
+                  <th scope="col" class="mp3-channelMode">Channel mode</th>
+                  <th scope="col" class="mp3-copyright" hidden>Copyright bit</th>
+                  <th scope="col" class="mp3-original" hidden>Home (original bit)</th>
+                  <th scope="col" class="mp3-emphasis" hidden>Emphasis</th>
+                </tr>
+              </thead>
+              <tbody>
+              </tbody>
+            </table>
+
+            <!-- Big loading icon -->
+            <br/>
+            <div id="loading-icon" class="row justify-content-center" hidden>
+                <i title="Loading frames..." class="fas fa-sync fa-spin display-1"></i>
+            </div>
+      
+            <!-- Buttons to load more frames -->
+            <br/>
+            <div id="file-ctrls" class="row justify-content-center" hidden>
+              <div class="col-2"><button id="load-10" class="btn btn-primary btn-block mp3-load-btn" title="Load 10 more frames" data-mp3-frames="10">+10</button></div>
+              <div class="col-2"><button id="load-100" class="btn btn-primary btn-block mp3-load-btn ml-2" title="Load 100 more frames" data-mp3-frames="100">+100</button></div>
+              <div class="col-2"><button id="load-1000" class="btn btn-primary btn-block mp3-load-btn ml-2" title="Load 1000 more frames" data-mp3-frames="1000">+1000</button></div>
+              <div class="col-2"><button id="load-rest" class="btn btn-primary btn-block mp3-load-btn ml-2" title="Load all remaining frames" data-mp3-frames="-1">+Rest</button></div>
+            </div>
+
         </div>
-      </div>
+        <div id="settings" class="col-3 bg-light collapse show">
 
-      <!-- List of loaded frames! -->
-      <br/>
-      <table id="frames" class="table" hidden>
-        <thead>
-          <tr>
-            <th scope="col">Frame</th>
-            <th scope="col">MPEG version ID</th>
-            <th scope="col">Layer</th>
-            <th scope="col">Bitrate</th>
-            <th scope="col">Sampe rate</th>
-            <th scope="col">Channel mode</th>
-          </tr>
-        </thead>
-        <tbody>
-        </tbody>
-      </table>
-      <br/>
-      <div id="loading-icon" class="row justify-content-center" hidden>
-          <i title="Loading frames..." class="fas fa-sync fa-spin display-1"></i>
-      </div>
+            <!-- Display options -->
+            <br/>
+            <h2>Display Options</h2>
+            <form class="">
+              <div class="form-row justify-content-center">
+                <div class="col">
+                    <div class="form-group">
+                        <label for="display-fields">Show these fields in the results table:</label>
+                        <select id="display-fields" class="custom-select" multiple>
+                          <option value="version" selected>MPEG version ID</option>
+                          <option value="layer" selected>Layer</option>
+                          <option value="protected">Protected bit</option>
+                          <option value="bitRate" selected>Bitrate</option>
+                          <option value="sampleRate" selected>Sample rate (frequency)</option>
+                          <option value="padding">Padding bit</option>
+                          <option value="private">Private bit</option>
+                          <option value="channelMode" selected>Channel mode</option>
+                          <option value="modeExtension">Mode extension</option>
+                          <option value="copyright">Copyright bit</option>
+                          <option value="original">Home (original bit)</option>
+                          <option value="emphasis">Emphasis</option>
+                        </select>
+                    </div>
+                </div>
+              </div>
+            </form>
 
-      <!-- Buttons to load more frames -->
-      <br/>
-      <div id="file-ctrls" class="row justify-content-center" hidden>
-        <div class="col-2"><button id="load-10" class="btn btn-primary btn-block mp3-load-btn" title="Load 10 more frames" data-mp3-frames="10">+10</button></div>
-        <div class="col-2"><button id="load-100" class="btn btn-primary btn-block mp3-load-btn ml-2" title="Load 100 more frames" data-mp3-frames="100">+100</button></div>
-        <div class="col-2"><button id="load-1000" class="btn btn-primary btn-block mp3-load-btn ml-2" title="Load 1000 more frames" data-mp3-frames="1000">+1000</button></div>
-        <div class="col-2"><button id="load-rest" class="btn btn-primary btn-block mp3-load-btn ml-2" title="Load all remaining frames" data-mp3-frames="-1">+Rest</button></div>
+        </div>
       </div>
 
     </div>

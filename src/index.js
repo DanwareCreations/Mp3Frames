@@ -9,6 +9,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
     let _loadingIcon;
 
+    let _fieldsShown = {
+        version: true,
+        layer: true,
+        protected: false,
+        bitRate: true,
+        sampleRate: true,
+        padding: false,
+        private: false,
+        channelMode: true,
+        copyright: false,
+        original: false,
+        emphasis: false,
+    }
+
     const _sectionDescs = {
         "Sync": "This is what 'Sync' means.",
         "MPEG version ID": "This is what 'MPEG version ID' means",
@@ -65,7 +79,21 @@ document.addEventListener("DOMContentLoaded", () => {
                 trigger: "click hover focus",
                 placement: "top",
                 selector: "[data-toggle='popover']"
-             });
+            });
+
+            // Adjust visible columns as user changes display options
+            const dllDispFields = document.getElementById("display-fields");
+            dllDispFields.addEventListener("change", e=> {
+                for (let f = 0; f < dllDispFields.length; ++f) {
+                    const opt = dllDispFields[f];
+                    if (opt.selected !== _fieldsShown[opt.value]) {
+                        _fieldsShown[opt.value] = opt.selected;
+                        const cells = Array.from(document.getElementsByClassName(`mp3-${opt.value}`));
+                        for (let c = 0; c < cells.length; ++c)
+                            cells[c].hidden = !opt.selected;
+                    }
+                }
+            });
 
             // Get some other important UI elements
             _fileCtrls  = document.getElementById("file-ctrls");
@@ -128,18 +156,24 @@ document.addEventListener("DOMContentLoaded", () => {
                     sectionsHtml += getHeaderSectionHtml("text-white bg-success", "Sample rate (frequency)", _sectionDescs["Sample rate (frequency)"], hdrStrs.sampleRate, frame.header.sampleRate.index);
                     sectionsHtml += getHeaderSectionHtml("bg-light", "Padding bit", _sectionDescs["Padding bit"], hdrStrs.padding, frame.header.padding);
                     sectionsHtml += getHeaderSectionHtml("bg-light", "Private bit", _sectionDescs["Private bit"], hdrStrs.private, frame.header.private);
-                    sectionsHtml += getHeaderSectionHtml("text-white bg-info", "Channel mode", _sectionDescs["Channel mode"], hdrStrs.version, frame.header.version);
+                    sectionsHtml += getHeaderSectionHtml("text-white bg-info", "Channel mode", _sectionDescs["Channel mode"], hdrStrs.channelMode, frame.header.channelMode);
                     sectionsHtml += getHeaderSectionHtml("bg-light", "Copyright bit", _sectionDescs["Copyright bit"], hdrStrs.copyright, frame.header.copyright);
                     sectionsHtml += getHeaderSectionHtml("bg-light", "Home (original bit)", _sectionDescs["Home (original bit)"], hdrStrs.original, frame.header.original);
                     sectionsHtml += getHeaderSectionHtml("text-white bg-warning", "Emphasis", _sectionDescs["Emphasis"], hdrStrs.emphasis, frame.header.emphasis);
                     const frameHtml = `
                         <tr class="mp3-frame-result" data-controls="frame-${_frameNum}">
                             <td>#${_frameNum}</td>
-                            <td>${hdrStrs.version}</td>
-                            <td>${hdrStrs.layer}</td>
-                            <td>${hdrStrs.bitRate}</td>
-                            <td>${hdrStrs.sampleRate}</td>
-                            <td>${hdrStrs.channelMode}</td>
+                            <td class="mp3-version" ${_fieldsShown["version"] ? "" : "hidden"}>${hdrStrs.version}</td>
+                            <td class="mp3-layer" ${_fieldsShown["layer"] ? "" : "hidden"}>${hdrStrs.layer}</td>
+                            <td class="mp3-protected" ${_fieldsShown["protected"] ? "" : "hidden"}>${hdrStrs.protected}</td>
+                            <td class="mp3-bitRate" ${_fieldsShown["bitRate"] ? "" : "hidden"}>${hdrStrs.bitRate}</td>
+                            <td class="mp3-sampleRate" ${_fieldsShown["sampleRate"] ? "" : "hidden"}>${hdrStrs.sampleRate}</td>
+                            <td class="mp3-padding" ${_fieldsShown["padding"] ? "" : "hidden"}>${hdrStrs.padding}</td>
+                            <td class="mp3-private" ${_fieldsShown["private"] ? "" : "hidden"}>${hdrStrs.private}</td>
+                            <td class="mp3-channelMode" ${_fieldsShown["channelMode"] ? "" : "hidden"}>${hdrStrs.channelMode}</td>
+                            <td class="mp3-copyright" ${_fieldsShown["copyright"] ? "" : "hidden"}>${hdrStrs.copyright}</td>
+                            <td class="mp3-original" ${_fieldsShown["original"] ? "" : "hidden"}>${hdrStrs.original}</td>
+                            <td class="mp3-emphasis" ${_fieldsShown["emphasis"] ? "" : "hidden"}>${hdrStrs.emphasis}</td>
                         </tr>
                         <tr>
                             <td colspan="6" class="p-0">
