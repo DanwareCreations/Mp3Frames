@@ -4,6 +4,8 @@ let Frame;
 
     Frame = class {
         constructor(dataView, start) {
+            // See this article for a great description of the MP3 format: https://www.mp3-tech.org/programmer/docs/mp3_theory.pdf
+
             // Make sure the frame is synced; if not, then just return
             let bits = dataView.getUint32(start);
             this.isSync        = (bits & 0b11111111111000000000000000000000) != 0;
@@ -16,36 +18,47 @@ let Frame;
                 version:         (bits & 0b00000000000110000000000000000000) >> 19,
                 layer:           (bits & 0b00000000000001100000000000000000) >> 17,
                 protected:       (bits & 0b00000000000000010000000000000000) != 0,
-                bitRateIndex :   (bits & 0b00000000000000001111000000000000) >> 12,
-                sampleRateIndex: (bits & 0b00000000000000000000110000000000) >> 10,
+                bitRate: {
+                    index:       (bits & 0b00000000000000001111000000000000) >> 12,
+                    value: undefined,
+                },
+                sampleRate: {
+                    index:       (bits & 0b00000000000000000000110000000000) >> 10,
+                    value: undefined,
+                },
                 padding:         (bits & 0b00000000000000000000001000000000) != 0,
                 private:         (bits & 0b00000000000000000000000100000000) != 0,
                 channelMode:     (bits & 0b00000000000000000000000011000000) >> 6,
-                modeExtension:   (bits & 0b00000000000000000000000000110000) >> 4,
+                modeExtension: {
+                    bits:        (bits & 0b00000000000000000000000000110000) >> 4,
+                    msStereoOn: undefined,
+                    intensityStereoOn: undefined
+                },
                 copyright:       (bits & 0b00000000000000000000000000001000) >> 3,
                 original:        (bits & 0b00000000000000000000000000000100) >> 2,
                 emphasis:        (bits & 0b00000000000000000000000000000011),
             };
 
             // Lookup the bit rate and sample rate from their respective indices
-            this.bitRate = Frame.getBitrate(hdr.version, hdr.layer, hdr.bitRateIndex);
-            this.sampleRate = Frame.getSampleRate(hdr.version, hdr.sampleRateIndex);
+            hdr.bitRate.value = Frame.getBitrate(hdr.version, hdr.layer, hdr.bitRate.index);
+            hdr.sampleRate.value = Frame.getSampleRate(hdr.version, hdr.sampleRate.index);
 
             // Set some channelMode-specific propertes
             this.isMono = (hdr.channelMode === Frame.ChannelMode.SingleChannel);
-            this.intensityStereoOn = (hdr.channelMode === Frame.ChannelMode.JointStereo) ? (hdr.modeExtension === 1 || hdr.modeExtension === 3) : undefined;
-            this.msStereoOn        = (hdr.channelMode === Frame.ChannelMode.JointStereo) ? (hdr.modeExtension === 2 || hdr.modeExtension === 3) : undefined;
+            if (hdr.channelMode === Frame.ChannelMode.JointStereo) {
+                hdr.modeExtension.intensityStereoOn = (hdr.modeExtension.bits === 1 || hdr.modeExtension.bits === 3);
+                hdr.modeExtension.msStereoOn        = (hdr.modeExtension.bits === 2 || hdr.modeExtension.bits === 3);
+            }
 
             // Parse CRC, if the frame is protected
             this.crc = this.protected ? dataView.getUint16(start + 4) : null;
 
             // Parse side information
-            const isMono = this.channelMode === 3;
             const sideInfoStart = start + (this.protected ? 6 : 4);
             bits = dataView.getUint32(sideInfoStart);
             this.sideInfo = {
                 mainDataBegin: (bits & 0b11111111100000000000000000000000) >> 23,
-                scaleFactorSelectionInfo: isMono
+                scaleFactorSelectionInfo: this.isMono
                              ? (bits & 0b00000000000000111100000000000000) >> 14
                              : (bits & 0b00000000000011111111000000000000) >> 12
             };
@@ -79,6 +92,70 @@ let Frame;
                 sampleRateArr = [ 11025, 12000, 8000,  undefined ];
 
             return sampleRateArr[sampleRateIndex];
+        }
+        getStringifiedHeader() {
+            const hdr = this.header;
+
+            // Stringify (most) header fields
+            const hdrStrs = {
+                version:       "?",
+                layer:         "?",
+                protected:     hdr.protected ? "Y" : "N",
+                bitRate:       `${hdr.bitRate.value.toLocaleString()} kbps`,
+                sampleRate:    `${hdr.sampleRate.value.toLocaleString()} Hz`,
+                padding:       hdr.padding ? "padding" : "no padding",
+                private:       hdr.private ? "private" : "not private",
+                channelMode:   "?",
+                modeExtension: {
+                    msStereoOn: "N/A",
+                    intensityStereoOn: "N/A"
+                },
+                copyright:     hdr.copyright ? "copyright" : "no copyright",
+                original:      hdr.original ? "original" : "not original",
+                emphasis:      "?",
+            };
+
+            // Stringify MPEG Version
+            if (hdr.version === Frame.Version.MPEG1)
+                hdrStrs.version = "MPEG-1";
+            else if (hdr.version === Frame.Version.MPEG2)
+                hdrStrs.version = "MPEG-2";
+            else if (hdr.version === Frame.Version.MPEG2_5)
+                hdrStrs.version = "MPEG-2.5";
+
+            // Stringify Layer
+            if (hdr.layer === Frame.Layer.I)
+                hdrStrs.layer = "I";
+            else if (hdr.layer === Frame.Layer.II)
+                hdrStrs.layer = "II";
+            else if (hdr.layer === Frame.Layer.III)
+                hdrStrs.layer = "III";
+
+            // Stringify Channel Mode
+            if (hdr.channelMode === Frame.ChannelMode.Stereo)
+                hdrStrs.channelMode = "Stereo";
+            else if (hdr.channelMode === Frame.ChannelMode.JointStereo)
+                hdrStrs.channelMode = "Joint stereo";
+            else if (hdr.channelMode === Frame.ChannelMode.DualChannel)
+                hdrStrs.channelMode = "Dual channel";
+            else if (hdr.channelMode === Frame.ChannelMode.SingleChannel)
+                hdrStrs.channelMode = "Single channel (mono)";
+
+            // Stringify Mode Extensions
+            if (!this.isMono) {
+                hdrStrs.modeExtension.msStereoOn = hdr.modeExtension.msStereoOn ? "Y" : "N";
+                hdrStrs.modeExtension.intensityStereoOn = hdr.modeExtension.intensityStereoOn ? "Y" : "N";
+            }
+
+            // Stringify Emphasis
+            if (hdr.emphasis === Frame.Emphasis.None)
+                hdrStrs.emphasis = "None";
+            else if (hdr.emphasis === Frame.Emphasis.MS50_15)
+                hdrStrs.emphasis = "50/15 ms";
+            else if (hdr.emphasis === Frame.Emphasis.CCITT_J_17)
+                hdrStrs.emphasis = "CCITT J.17";
+
+            return hdrStrs;
         }
     }
 
