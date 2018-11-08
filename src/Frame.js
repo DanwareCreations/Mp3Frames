@@ -56,14 +56,14 @@ let Frame;
             let bitrateArr = [];
 
             if (layer === Frame.Layer.I)
-                bitrateArr = [ 32, 64, 96, 128, 160, 192, 224, 256, 288, 320, 352, 384, 416, 448 ];
+                bitrateArr = [ undefined, 32, 64, 96, 128, 160, 192, 224, 256, 288, 320, 352, 384, 416, 448, undefined ];
             if (layer === Frame.Layer.II)
-                bitrateArr = [ 32, 48, 56, 64 , 80 , 96 , 112, 128, 160, 192, 224, 256, 320, 384 ];
+                bitrateArr = [ undefined, 32, 48, 56, 64 , 80 , 96 , 112, 128, 160, 192, 224, 256, 320, 384, undefined ];
             if (layer === Frame.Layer.III) {
                 if (version === Frame.Version.MPEG1)
-                    bitrateArr = [ 32, 40, 48, 56 , 64 , 80 , 96 , 112, 128, 160, 192, 224, 256, 320 ];
+                    bitrateArr = [ undefined, 32, 40, 48, 56 , 64 , 80 , 96 , 112, 128, 160, 192, 224, 256, 320, undefined ];
                 if (version !== Frame.Version.MPEG1)
-                    bitrateArr = [ 8 , 16, 24, 32 , 64 , 80 , 56 , 64 , 128, 160, 112, 128, 256, 320 ];
+                    bitrateArr = [ undefined, 8, 16, 24, 32 , 64 , 80 , 56 , 64 , 128, 160, 112, 128, 256, 320, undefined ];
             }
 
             return bitrateArr[bitrateIndex];
