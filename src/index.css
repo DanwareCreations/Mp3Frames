@@ -4,3 +4,13 @@ body {
 .mp3-frame-result {
     cursor: pointer;
 }
+.mp3-max-height {
+    height: 100vh;
+}
+.mp3-col-scrollable {
+    height: 100%;
+    overflow-y: scroll;
+}
+.mp3-no-scroll-select {
+    overflow: auto;
+}
