@@ -91,12 +91,12 @@
 
         </div>
         <div id="options" class="col-3 bg-light collapse show h-100">
-
-            <!-- Options menu -->
             <br/>
-            <h2>Options</h2>
-            <form class="">
-              <div class="form-row justify-content-center">
+            <h2><i class="fas fa-cog"></i> Options</h2>
+            <form>
+
+              <!-- Frame field column toggles -->
+              <div class="form-row">
                 <div class="col">
                     <div class="form-group">
                         <label for="display-fields">Show these fields in the results table:</label>
@@ -116,11 +116,19 @@
                           <option id="opt-emphasis" value="emphasis">Emphasis</option>
                         </select>
                     </div>
-                    <button type="button" id="btn-defaults" class="btn btn-outline-primary float-right">Restore defaults</button>
                 </div>
               </div>
-            </form>
 
+              <!-- Restore defaults button -->
+              <div class="form-row">
+                <div class="col">
+                    <button type="button" id="btn-defaults" class="btn btn-outline-primary float-right">
+                      <i class="fas fa-reply"></i> Restore defaults
+                    </button>
+                </div>
+              </div>
+
+            </form>
         </div>
       </div>
 
