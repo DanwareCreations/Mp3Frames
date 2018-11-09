@@ -99,8 +99,8 @@
               <div class="form-row">
                 <div class="col">
                     <div class="form-group">
-                        <label for="display-fields">Show these fields in the results table:</label>
-                        <select id="display-fields" class="custom-select mp3-no-scroll-select" multiple size="13">
+                        <label for="display-field-cols">Show these fields in the results table:</label>
+                        <select id="display-field-cols" class="custom-select mp3-no-scroll-select" multiple size="13">
                           <option id="opt-version" value="version">MPEG version ID</option>
                           <option id="opt-layer" value="layer">Layer</option>
                           <option id="opt-protected" value="protected">Protected bit</option>
@@ -116,6 +116,21 @@
                           <option id="opt-emphasis" value="emphasis">Emphasis</option>
                         </select>
                     </div>
+                </div>
+              </div>
+
+              <!-- Frame value row toggles -->
+              <div class="form-row">
+                <div class="col">
+                  <div class="form-group">
+                    <label for="display-value-rows">Show these rows in the fields tables:</label>
+                    <select id="display-value-rows" class="custom-select mp3-no-scroll-select" multiple size="4">
+                      <option id="opt-meaning" value="meaning">Value meanings</option>
+                      <option id="opt-binary" value="binary">Binary values</option>
+                      <option id="opt-hex" value="hex">Hexadecimal values</option>
+                      <option id="opt-decimal" value="decimal">Decimal values</option>
+                    </select>
+                  </div>
                 </div>
               </div>
 

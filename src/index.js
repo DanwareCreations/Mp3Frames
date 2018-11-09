@@ -9,8 +9,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     let _loadingIcon;
 
-    let _ddlDisplayFields;
-    const _fieldsShown = {
+    let _ddlFieldCols;
+    const _fieldColsShown = {
         version: false,
         layer: false,
         protected: false,
@@ -24,6 +24,14 @@ document.addEventListener("DOMContentLoaded", () => {
         copyright: false,
         original: false,
         emphasis: false
+    }
+
+    let _ddlValueRows;
+    const _valRowsShown = {
+        meaning: false,
+        binary: false,
+        hex: false,
+        decimal: false
     }
 
     const _fieldColors = {
@@ -102,50 +110,76 @@ document.addEventListener("DOMContentLoaded", () => {
                 selector: "[data-toggle='popover']"
             });
 
-            // Adjust visible columns as user changes display options
-            _ddlDisplayFields = document.getElementById("display-fields");
-            _ddlDisplayFields.addEventListener("change", e => {
-                this.resetDisplayedFields(_ddlDisplayFields);
+            // Adjust visible columns of the result table as user changes options
+            _ddlFieldCols = document.getElementById("display-field-cols");
+            _ddlFieldCols.addEventListener("change", e => {
+                this.resetFieldColumns();
+            });
+
+            // Adjust visible rows of the field tables as user changes options
+            _ddlValueRows = document.getElementById("display-value-rows");
+            _ddlValueRows.addEventListener("change", e => {
+                this.resetValueRows();
             });
 
             // Add click listeners to the Restore Defaults button
             const btnDefaults = document.getElementById("btn-defaults");
             btnDefaults.addEventListener("click", e => {
                 this.restoreDefaults();
-                this.resetDisplayedFields();
             });
 
             // Toggle the fields that are displayed by default
             this.restoreDefaults();
-            this.resetDisplayedFields();
 
             // Get some other important UI elements
             _fileCtrls  = document.getElementById("file-ctrls");
             _loadingIcon = document.getElementById("loading-icon");
         }
         restoreDefaults() {
-            _ddlDisplayFields.namedItem("opt-version").selected = true;
-            _ddlDisplayFields.namedItem("opt-layer").selected = true;
-            _ddlDisplayFields.namedItem("opt-protected").selected = false;
-            _ddlDisplayFields.namedItem("opt-bitRate").selected = true;
-            _ddlDisplayFields.namedItem("opt-sampleRate").selected = true;
-            _ddlDisplayFields.namedItem("opt-padding").selected = false;
-            _ddlDisplayFields.namedItem("opt-private").selected = false;
-            _ddlDisplayFields.namedItem("opt-channelMode").selected = true;
-            _ddlDisplayFields.namedItem("opt-intensityStereoOn").selected = false;
-            _ddlDisplayFields.namedItem("opt-msStereoOn").selected = false;
-            _ddlDisplayFields.namedItem("opt-copyright").selected = false;
-            _ddlDisplayFields.namedItem("opt-original").selected = false;
-            _ddlDisplayFields.namedItem("opt-emphasis").selected = false;
+            // Re-select default field columns
+            _ddlFieldCols.namedItem("opt-version").selected = true;
+            _ddlFieldCols.namedItem("opt-layer").selected = true;
+            _ddlFieldCols.namedItem("opt-protected").selected = false;
+            _ddlFieldCols.namedItem("opt-bitRate").selected = true;
+            _ddlFieldCols.namedItem("opt-sampleRate").selected = true;
+            _ddlFieldCols.namedItem("opt-padding").selected = false;
+            _ddlFieldCols.namedItem("opt-private").selected = false;
+            _ddlFieldCols.namedItem("opt-channelMode").selected = true;
+            _ddlFieldCols.namedItem("opt-intensityStereoOn").selected = false;
+            _ddlFieldCols.namedItem("opt-msStereoOn").selected = false;
+            _ddlFieldCols.namedItem("opt-copyright").selected = false;
+            _ddlFieldCols.namedItem("opt-original").selected = false;
+            _ddlFieldCols.namedItem("opt-emphasis").selected = false;
+
+            // Re-select default value rows
+            _ddlValueRows.namedItem("opt-meaning").selected = true;
+            _ddlValueRows.namedItem("opt-binary").selected = true;
+            _ddlValueRows.namedItem("opt-hex").selected = false;
+            _ddlValueRows.namedItem("opt-decimal").selected = false;
+
+            // Reset displayed field columns and value rows accordingly
+            this.resetFieldColumns();
+            this.resetValueRows();
         }
-        resetDisplayedFields() {
-            for (let f = 0; f < _ddlDisplayFields.length; ++f) {
-                const opt = _ddlDisplayFields[f];
-                if (opt.selected !== _fieldsShown[opt.value]) {
-                    _fieldsShown[opt.value] = opt.selected;
-                    const cells = Array.from(document.getElementsByClassName(`mp3-${opt.value}`));
-                    for (let c = 0; c < cells.length; ++c)
-                        cells[c].hidden = !opt.selected;
+        resetFieldColumns() {
+            for (let c = 0; c < _ddlFieldCols.length; ++c) {
+                const opt = _ddlFieldCols[c];
+                if (opt.selected !== _fieldColsShown[opt.value]) {
+                    _fieldColsShown[opt.value] = opt.selected;
+                    const colCells = Array.from(document.getElementsByClassName(`mp3-${opt.value}`));
+                    for (let c = 0; c < colCells.length; ++c)
+                        colCells[c].hidden = !opt.selected;
+                }
+            }
+        }
+        resetValueRows() {
+            for (let r = 0; r < _ddlValueRows.length; ++r) {
+                const opt = _ddlValueRows[r];
+                if (opt.selected !== _valRowsShown[opt.value]) {
+                    _valRowsShown[opt.value] = opt.selected;
+                    const rows = Array.from(document.getElementsByClassName(`mp3-${opt.value}`));
+                    for (let c = 0; c < rows.length; ++c)
+                        rows[c].hidden = !opt.selected;
                 }
             }
         }
@@ -201,19 +235,19 @@ document.addEventListener("DOMContentLoaded", () => {
                     const frameHtml = `
                         <tr class="mp3-frame-result" data-controls="frame-${_frameNum}">
                             <td>#${_frameNum}</td>
-                            <td class="mp3-version"           ${_fieldsShown.version            ? "" : "hidden"}>${hdrStrs.version}</td>
-                            <td class="mp3-layer"             ${_fieldsShown.layer              ? "" : "hidden"}>${hdrStrs.layer}</td>
-                            <td class="mp3-protected"         ${_fieldsShown.protected          ? "" : "hidden"}>${hdrStrs.protected}</td>
-                            <td class="mp3-bitRate"           ${_fieldsShown.bitRate            ? "" : "hidden"}>${hdrStrs.bitRate}</td>
-                            <td class="mp3-sampleRate"        ${_fieldsShown.sampleRate         ? "" : "hidden"}>${hdrStrs.sampleRate}</td>
-                            <td class="mp3-padding"           ${_fieldsShown.padding            ? "" : "hidden"}>${hdrStrs.padding}</td>
-                            <td class="mp3-private"           ${_fieldsShown.private            ? "" : "hidden"}>${hdrStrs.private}</td>
-                            <td class="mp3-channelMode"       ${_fieldsShown.channelMode        ? "" : "hidden"}>${hdrStrs.channelMode}</td>
-                            <td class="mp3-intensityStereoOn" ${_fieldsShown.intensityStereoOn  ? "" : "hidden"}>${hdrStrs.modeExtension.intensityStereoOn}</td>
-                            <td class="mp3-msStereoOn"        ${_fieldsShown.msStereoOn         ? "" : "hidden"}>${hdrStrs.modeExtension.msStereoOn}</td>
-                            <td class="mp3-copyright"         ${_fieldsShown.copyright          ? "" : "hidden"}>${hdrStrs.copyright}</td>
-                            <td class="mp3-original"          ${_fieldsShown.original           ? "" : "hidden"}>${hdrStrs.original}</td>
-                            <td class="mp3-emphasis"          ${_fieldsShown.emphasis           ? "" : "hidden"}>${hdrStrs.emphasis}</td>
+                            <td class="mp3-version"           ${_fieldColsShown.version            ? "" : "hidden"}>${hdrStrs.version}</td>
+                            <td class="mp3-layer"             ${_fieldColsShown.layer              ? "" : "hidden"}>${hdrStrs.layer}</td>
+                            <td class="mp3-protected"         ${_fieldColsShown.protected          ? "" : "hidden"}>${hdrStrs.protected}</td>
+                            <td class="mp3-bitRate"           ${_fieldColsShown.bitRate            ? "" : "hidden"}>${hdrStrs.bitRate}</td>
+                            <td class="mp3-sampleRate"        ${_fieldColsShown.sampleRate         ? "" : "hidden"}>${hdrStrs.sampleRate}</td>
+                            <td class="mp3-padding"           ${_fieldColsShown.padding            ? "" : "hidden"}>${hdrStrs.padding}</td>
+                            <td class="mp3-private"           ${_fieldColsShown.private            ? "" : "hidden"}>${hdrStrs.private}</td>
+                            <td class="mp3-channelMode"       ${_fieldColsShown.channelMode        ? "" : "hidden"}>${hdrStrs.channelMode}</td>
+                            <td class="mp3-intensityStereoOn" ${_fieldColsShown.intensityStereoOn  ? "" : "hidden"}>${hdrStrs.modeExtension.intensityStereoOn}</td>
+                            <td class="mp3-msStereoOn"        ${_fieldColsShown.msStereoOn         ? "" : "hidden"}>${hdrStrs.modeExtension.msStereoOn}</td>
+                            <td class="mp3-copyright"         ${_fieldColsShown.copyright          ? "" : "hidden"}>${hdrStrs.copyright}</td>
+                            <td class="mp3-original"          ${_fieldColsShown.original           ? "" : "hidden"}>${hdrStrs.original}</td>
+                            <td class="mp3-emphasis"          ${_fieldColsShown.emphasis           ? "" : "hidden"}>${hdrStrs.emphasis}</td>
                         </tr>
                         <tr>
                             <td colspan="6" class="p-0">
@@ -235,7 +269,7 @@ document.addEventListener("DOMContentLoaded", () => {
                                             <th scope="colgroup" colspan="1"  class="d-none text-center text-monospace bg-${_fieldColors.original}">Home (original bit)</th>
                                             <th scope="colgroup" colspan="2"  class="d-none text-center text-monospace bg-${_fieldColors.emphasis}">Emphasis</th>
                                         </tr>
-                                        <tr>
+                                        <tr class="mp3-binary" ${_valRowsShown.binary ? "" : "hidden"}>
                                             <td class="text-center text-monospace bg-${_fieldColors.sync}">1</td>
                                             <td class="text-center text-monospace bg-${_fieldColors.sync}">1</td>
                                             <td class="text-center text-monospace bg-${_fieldColors.sync}">1</td>
@@ -269,7 +303,7 @@ document.addEventListener("DOMContentLoaded", () => {
                                             <td class="text-center text-monospace bg-${_fieldColors.emphasis}">${hdr.emphasis.toString(2).padStart(2, "0")[0]}</td>
                                             <td class="text-center text-monospace bg-${_fieldColors.emphasis}">${hdr.emphasis.toString(2).padStart(2, "0")[1]}</td>
                                         </tr>
-                                        <tr>
+                                        <tr class="mp3-meaning" ${_valRowsShown.meaning ? "" : "hidden"}>
                                             <td colspan="11" class="text-center text-monospace bg-${_fieldColors.sync}">Synchronized</td>
                                             <td colspan="2"  class="text-center text-monospace bg-${_fieldColors.version}">${hdrStrs.version}</td>
                                             <td colspan="2"  class="text-center text-monospace bg-${_fieldColors.layer}">${hdrStrs.layer}</td>
@@ -285,7 +319,7 @@ document.addEventListener("DOMContentLoaded", () => {
                                             <td colspan="1"  class="text-center text-monospace bg-${_fieldColors.original}">${hdrStrs.original}</td>
                                             <td colspan="2"  class="text-center text-monospace bg-${_fieldColors.emphasis}">${hdrStrs.emphasis}</td>
                                         </tr>
-                                        <tr>
+                                        <tr class="mp3-hex" ${_valRowsShown.hex ? "" : "hidden"}>
                                             <td colspan="11" class="text-center text-monospace bg-${_fieldColors.sync}">0x7FF</td>
                                             <td colspan="2"  class="text-center text-monospace bg-${_fieldColors.version}">0x${hdr.version.toString(16)}</td>
                                             <td colspan="2"  class="text-center text-monospace bg-${_fieldColors.layer}">0x${hdr.layer.toString(16)}</td>
@@ -301,7 +335,7 @@ document.addEventListener("DOMContentLoaded", () => {
                                             <td colspan="1"  class="text-center text-monospace bg-${_fieldColors.original}">0x${hdr.original ? "1" : "0"}</td>
                                             <td colspan="2"  class="text-center text-monospace bg-${_fieldColors.emphasis}">0x${hdr.emphasis.toString(16)}</td>
                                         </tr>
-                                        <tr>
+                                        <tr class="mp3-decimal" ${_valRowsShown.decimal ? "" : "hidden"}>
                                             <td colspan="11" class="text-center text-monospace bg-${_fieldColors.sync}">2047</td>
                                             <td colspan="2"  class="text-center text-monospace bg-${_fieldColors.version}">${hdr.version.toString(10)}</td>
                                             <td colspan="2"  class="text-center text-monospace bg-${_fieldColors.layer}">${hdr.layer.toString(10)}</td>
