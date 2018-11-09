@@ -162,6 +162,7 @@ document.addEventListener("DOMContentLoaded", () => {
             this.resetValueRows();
         }
         resetFieldColumns() {
+            // Toggle field column visibility
             for (let c = 0; c < _ddlFieldCols.length; ++c) {
                 const opt = _ddlFieldCols[c];
                 if (opt.selected !== _fieldColsShown[opt.value]) {
@@ -170,6 +171,15 @@ document.addEventListener("DOMContentLoaded", () => {
                     for (let c = 0; c < colCells.length; ++c)
                         colCells[c].hidden = !opt.selected;
                 }
+            }
+
+            // Adjust column span of the table cell containing the field-values table
+            const numColsShown = _ddlFieldCols.selectedOptions.length + 1;      // +1 for the always-present Frame # column
+            const frameTbls = Array.from(document.getElementsByClassName("mp3-frame-tbl"));
+            for (let t = 0; t < frameTbls.length; ++t) {
+                const tbl = frameTbls[t];
+                const td = tbl.closest("td");
+                td.colSpan = numColsShown;
             }
         }
         resetValueRows() {
@@ -251,7 +261,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         </tr>
                         <tr>
                             <td colspan="6" class="p-0">
-                                <div id="frame-${_frameNum}" class="collapse row justify-content-center py-4">
+                                <div id="frame-${_frameNum}" class="mp3-frame-tbl collapse row justify-content-center py-4">
                                     <table class="table table-bordered text-white">
                                         <tr>
                                             <th scope="colgroup" colspan="11" class="d-none text-center text-monospace bg-${_fieldColors.sync}">Sync</th>
