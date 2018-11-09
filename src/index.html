@@ -48,6 +48,7 @@
             </div>
 
             <!-- List of loaded frames! -->
+            <br/>
             <div class="row">
               <table id="frames" class="table" hidden>
                 <thead>
@@ -61,6 +62,8 @@
                     <th scope="col" class="mp3-padding" hidden>Padding bit</th>
                     <th scope="col" class="mp3-private" hidden>Private bit</th>
                     <th scope="col" class="mp3-channelMode" hidden>Channel mode</th>
+                    <th scope="col" class="mp3-intensityStereoOn" hidden>Intensity stereo</th>
+                    <th scope="col" class="mp3-msStereoOn" hidden>MS stereo</th>
                     <th scope="col" class="mp3-copyright" hidden>Copyright bit</th>
                     <th scope="col" class="mp3-original" hidden>Home (original bit)</th>
                     <th scope="col" class="mp3-emphasis" hidden>Emphasis</th>
@@ -97,7 +100,7 @@
                 <div class="col">
                     <div class="form-group">
                         <label for="display-fields">Show these fields in the results table:</label>
-                        <select id="display-fields" class="custom-select mp3-no-scroll-select" multiple size="12">
+                        <select id="display-fields" class="custom-select mp3-no-scroll-select" multiple size="13">
                           <option id="opt-version" value="version">MPEG version ID</option>
                           <option id="opt-layer" value="layer">Layer</option>
                           <option id="opt-protected" value="protected">Protected bit</option>
@@ -106,7 +109,8 @@
                           <option id="opt-padding" value="padding">Padding bit</option>
                           <option id="opt-private" value="private">Private bit</option>
                           <option id="opt-channelMode" value="channelMode">Channel mode</option>
-                          <option id="opt-modeExtension" value="modeExtension">Mode extension</option>
+                          <option id="opt-intensityStereoOn" value="intensityStereoOn">Intensity stereo</option>
+                          <option id="opt-msStereoOn" value="msStereoOn">MS stereo</option>
                           <option id="opt-copyright" value="copyright">Copyright bit</option>
                           <option id="opt-original" value="original">Home (original bit)</option>
                           <option id="opt-emphasis" value="emphasis">Emphasis</option>
