@@ -15,28 +15,28 @@ let Frame;
             // Parse frame header
             let hdr;
             this.header = hdr = {
-                version:         (bits & 0b00000000000110000000000000000000) >> 19,
-                layer:           (bits & 0b00000000000001100000000000000000) >> 17,
-                protected:       (bits & 0b00000000000000010000000000000000) != 0,
+                sync:                  0b11111111111,
+                version:               (bits & 0b110000000000000000000) >> 19,
+                layer:                 (bits & 0b001100000000000000000) >> 17,
+                protected:             (bits & 0b000010000000000000000) != 0,
                 bitRate: {
-                    index:       (bits & 0b00000000000000001111000000000000) >> 12,
+                    index:             (bits & 0b000001111000000000000) >> 12,
                     value: undefined,
                 },
                 sampleRate: {
-                    index:       (bits & 0b00000000000000000000110000000000) >> 10,
+                    index:             (bits & 0b000000000110000000000) >> 10,
                     value: undefined,
                 },
-                padding:         (bits & 0b00000000000000000000001000000000) != 0,
-                private:         (bits & 0b00000000000000000000000100000000) != 0,
-                channelMode:     (bits & 0b00000000000000000000000011000000) >> 6,
+                padding:               (bits & 0b000000000001000000000) != 0,
+                private:               (bits & 0b000000000000100000000) != 0,
+                channelMode:           (bits & 0b000000000000011000000) >> 6,
                 modeExtension: {
-                    bits:        (bits & 0b00000000000000000000000000110000) >> 4,
-                    intensityStereoOn: undefined,
-                    msStereoOn: undefined
+                    intensityStereoOn: (bits & 0b000000000000000100000) != 0,
+                    msStereoOn:        (bits & 0b000000000000000010000) != 0
                 },
-                copyright:       (bits & 0b00000000000000000000000000001000) >> 3,
-                original:        (bits & 0b00000000000000000000000000000100) >> 2,
-                emphasis:        (bits & 0b00000000000000000000000000000011),
+                copyright:             (bits & 0b000000000000000001000) != 0,
+                original:              (bits & 0b000000000000000000100) != 0,
+                emphasis:              (bits & 0b000000000000000000011)
             };
 
             // Lookup the bit rate and sample rate from their respective indices
@@ -45,10 +45,8 @@ let Frame;
 
             // Set some channelMode-specific propertes
             this.isMono = (hdr.channelMode === Frame.ChannelMode.SingleChannel);
-            if (hdr.channelMode === Frame.ChannelMode.JointStereo) {
-                hdr.modeExtension.intensityStereoOn = (hdr.modeExtension.bits === 1 || hdr.modeExtension.bits === 3);
-                hdr.modeExtension.msStereoOn        = (hdr.modeExtension.bits === 2 || hdr.modeExtension.bits === 3);
-            }
+            hdr.modeExtension.intensityStereoOn = (hdr.modeExtension.bits === 1 || hdr.modeExtension.bits === 3);
+            hdr.modeExtension.msStereoOn        = (hdr.modeExtension.bits === 2 || hdr.modeExtension.bits === 3);
 
             // Parse CRC, if the frame is protected
             this.crc = this.protected ? dataView.getUint16(start + 4) : null;
@@ -98,21 +96,20 @@ let Frame;
 
             // Stringify (most) header fields
             const hdrStrs = {
-                version:       "?",
-                layer:         "?",
-                protected:     hdr.protected ? "true" : "false",
-                bitRate:       `${hdr.bitRate.value ? hdr.bitRate.value.toLocaleString() : "?"} kbps`,
-                sampleRate:    `${hdr.sampleRate.value ? hdr.sampleRate.value.toLocaleString() : "?"} Hz`,
-                padding:       hdr.padding ? "true" : "false",
-                private:       hdr.private ? "true" : "false",
-                channelMode:   "?",
-                modeExtension: {
-                    intensityStereoOn: "N/A",
-                    msStereoOn: "N/A"
-                },
-                copyright:     hdr.copyright ? "true" : "false",
-                original:      hdr.original ? "true" : "false",
-                emphasis:      "?",
+                sync: "Synchronized",
+                version: "?",
+                layer: "?",
+                protected: hdr.protected ? "true" : "false",
+                bitRate: `${hdr.bitRate.value ? hdr.bitRate.value.toLocaleString() : "?"} kbps`,
+                sampleRate: `${hdr.sampleRate.value ? hdr.sampleRate.value.toLocaleString() : "?"} Hz`,
+                padding: hdr.padding ? "true" : "false",
+                private: hdr.private ? "true" : "false",
+                channelMode: "?",
+                intensityStereoOn: "N/A",
+                msStereoOn: "N/A",
+                copyright: hdr.copyright ? "true" : "false",
+                original: hdr.original ? "true" : "false",
+                emphasis: "?",
             };
 
             // Stringify MPEG Version
@@ -143,8 +140,8 @@ let Frame;
 
             // Stringify Mode Extensions
             if (!this.isMono) {
-                hdrStrs.modeExtension.intensityStereoOn = hdr.modeExtension.intensityStereoOn ? "true" : "false";
-                hdrStrs.modeExtension.msStereoOn = hdr.modeExtension.msStereoOn ? "true" : "false";
+                hdrStrs.intensityStereoOn = hdr.modeExtension.intensityStereoOn ? "true" : "false";
+                hdrStrs.msStereoOn = hdr.modeExtension.msStereoOn ? "true" : "false";
             }
 
             // Stringify Emphasis

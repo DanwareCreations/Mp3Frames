@@ -10,6 +10,8 @@ document.addEventListener("DOMContentLoaded", () => {
     let _loadingIcon;
 
     let _ddlFieldCols;
+    let _ddlValueRows;
+
     const _fieldColsShown = {
         version: false,
         layer: false,
@@ -24,48 +26,13 @@ document.addEventListener("DOMContentLoaded", () => {
         copyright: false,
         original: false,
         emphasis: false
-    }
-
-    let _ddlValueRows;
+    };
     const _valRowsShown = {
         meaning: false,
         binary: false,
         hex: false,
         decimal: false
-    }
-
-    const _fieldColors = {
-        sync: "success",
-        version: "info",
-        layer: "info",
-        protected: "secondary",
-        bitRate: "info",
-        sampleRate: "info",
-        padding: "secondary",
-        private: "secondary",
-        channelMode: "info",
-        intensityStereoOn: "secondary",
-        msStereoOn: "secondary",
-        copyright: "secondary",
-        original: "secondary",
-        emphasis: "info"
     };
-    const _fieldDescs = {
-        sync: "This is what 'Sync' means.",
-        version: "This is what 'MPEG version ID' means.",
-        layer: "This is what 'Layer' means.",
-        protected: "This is what 'Protection bit' means.",
-        bitRate: "This is what 'Bitrate' means.",
-        sampleRate: "This is what 'Sample rate (frequency)' means.",
-        padding: "This is what 'Padding bit' means.",
-        private: "This is what 'Private bit' means.",
-        channelMode: "This is what 'Channel mode' means.",
-        intensityStereoOn: "This is what 'Intensity stereo' means.",
-        msStereoOn: "This is what 'MS stereo' means.",
-        copyright: "This is what 'Mode extension' means.",
-        original: "This is what 'Home (original bit)' means.",
-        emphasis: "This is what 'Emphasis' means."
-    }
 
     class IndexPage {
 
@@ -241,126 +208,46 @@ document.addEventListener("DOMContentLoaded", () => {
     
                     ++_frameNum;
 
+
+                    let resultHdrs = `<td>#${_frameNum}</td>`;
+                    let valColHdrs = "";
+                    let valMeaningCells = "";
+                    let binaryValCells = "";
+                    let hexValCells = "";
+                    let decimalValCells = "";
+                    for (let fieldName in FieldConfig) {
+                        resultHdrs += `<td class="mp3-${fieldName}"${_fieldColsShown[fieldName] ? "" : "hidden"}>${hdrStrs[fieldName]}</td>`;
+                        valColHdrs += `
+                            <th scope="colgroup" colspan="${FieldConfig[fieldName].colSpan}" class="text-center text-monospace bg-${FieldConfig[fieldName].color}">
+                                ${FieldConfig[fieldName].header}
+                                <a tabindex="0" role="button" class="text-white float-right" data-toggle="popover" title="${FieldConfig[fieldName].header}" data-content="${FieldConfig[fieldName].description}"> 
+                                    <i class="fas fa-info-circle ml-2"></i>
+                                </a> 
+                            </th>
+                        `;
+                        valMeaningCells += `<td colspan="${FieldConfig[fieldName].colSpan}" class="text-center text-monospace bg-${FieldConfig[fieldName].color}">${hdrStrs[fieldName]}</td>`;
+                        const val = FieldConfig[fieldName].frameField(frame);
+                        const binaryStr = ((typeof(val) === "boolean") ? (val ? 1 : 0) : val).toString(2).padStart(FieldConfig[fieldName].colSpan, "0");
+                        for (let c = 0; c < binaryStr.length; ++c)
+                            binaryValCells += `<td class="text-center text-monospace bg-${FieldConfig[fieldName].color}">${binaryStr[c]}</td>`;
+                        const hexStr = ((typeof(val) === "boolean") ? (val ? 1 : 0) : val).toString(16);
+                        hexValCells += `<td colspan="${FieldConfig[fieldName].colSpan}" class="text-center text-monospace bg-${FieldConfig[fieldName].color}">0x${hexStr}</td>`;
+                        const decimalStr = ((typeof(val) === "boolean") ? (val ? 1 : 0) : val).toString();
+                        decimalValCells += `<td colspan="${FieldConfig[fieldName].colSpan}" class="text-center text-monospace bg-${FieldConfig[fieldName].color}">${decimalStr}</td>`;
+                    }
+
                     // Build up the HTML for this MP3 Frame
                     const frameHtml = `
-                        <tr class="mp3-frame-result" data-controls="frame-${_frameNum}">
-                            <td>#${_frameNum}</td>
-                            <td class="mp3-version"           ${_fieldColsShown.version            ? "" : "hidden"}>${hdrStrs.version}</td>
-                            <td class="mp3-layer"             ${_fieldColsShown.layer              ? "" : "hidden"}>${hdrStrs.layer}</td>
-                            <td class="mp3-protected"         ${_fieldColsShown.protected          ? "" : "hidden"}>${hdrStrs.protected}</td>
-                            <td class="mp3-bitRate"           ${_fieldColsShown.bitRate            ? "" : "hidden"}>${hdrStrs.bitRate}</td>
-                            <td class="mp3-sampleRate"        ${_fieldColsShown.sampleRate         ? "" : "hidden"}>${hdrStrs.sampleRate}</td>
-                            <td class="mp3-padding"           ${_fieldColsShown.padding            ? "" : "hidden"}>${hdrStrs.padding}</td>
-                            <td class="mp3-private"           ${_fieldColsShown.private            ? "" : "hidden"}>${hdrStrs.private}</td>
-                            <td class="mp3-channelMode"       ${_fieldColsShown.channelMode        ? "" : "hidden"}>${hdrStrs.channelMode}</td>
-                            <td class="mp3-intensityStereoOn" ${_fieldColsShown.intensityStereoOn  ? "" : "hidden"}>${hdrStrs.modeExtension.intensityStereoOn}</td>
-                            <td class="mp3-msStereoOn"        ${_fieldColsShown.msStereoOn         ? "" : "hidden"}>${hdrStrs.modeExtension.msStereoOn}</td>
-                            <td class="mp3-copyright"         ${_fieldColsShown.copyright          ? "" : "hidden"}>${hdrStrs.copyright}</td>
-                            <td class="mp3-original"          ${_fieldColsShown.original           ? "" : "hidden"}>${hdrStrs.original}</td>
-                            <td class="mp3-emphasis"          ${_fieldColsShown.emphasis           ? "" : "hidden"}>${hdrStrs.emphasis}</td>
-                        </tr>
+                        <tr class="mp3-frame-result" data-controls="frame-${_frameNum}">${resultHdrs}</tr>
                         <tr>
                             <td colspan="6" class="p-0">
                                 <div id="frame-${_frameNum}" class="mp3-frame-tbl collapse row justify-content-center py-4">
                                     <table class="table table-bordered text-white">
-                                        <tr>
-                                            <th scope="colgroup" colspan="11" class="d-none text-center text-monospace bg-${_fieldColors.sync}">Sync</th>
-                                            <th scope="colgroup" colspan="2"  class="d-none text-center text-monospace bg-${_fieldColors.version}">MPEG Version ID</th>
-                                            <th scope="colgroup" colspan="2"  class="d-none text-center text-monospace bg-${_fieldColors.layer}">Layer</th>
-                                            <th scope="colgroup" colspan="1"  class="d-none text-center text-monospace bg-${_fieldColors.protected}">Protection bit</th>
-                                            <th scope="colgroup" colspan="4"  class="d-none text-center text-monospace bg-${_fieldColors.bitRate}">Bitrate</th>
-                                            <th scope="colgroup" colspan="2"  class="d-none text-center text-monospace bg-${_fieldColors.sampleRate}">Sample rate (frequency)</th>
-                                            <th scope="colgroup" colspan="1"  class="d-none text-center text-monospace bg-${_fieldColors.padding}">Padding bit</th>
-                                            <th scope="colgroup" colspan="1"  class="d-none text-center text-monospace bg-${_fieldColors.private}">Private bit</th>
-                                            <th scope="colgroup" colspan="2"  class="d-none text-center text-monospace bg-${_fieldColors.channelMode}">Channel mode</th>
-                                            <th scope="colgroup" colspan="1"  class="d-none text-center text-monospace bg-${_fieldColors.intensityStereoOn}">Intensity stereo</th>
-                                            <th scope="colgroup" colspan="1"  class="d-none text-center text-monospace bg-${_fieldColors.msStereoOn}">MS stereo</th>
-                                            <th scope="colgroup" colspan="1"  class="d-none text-center text-monospace bg-${_fieldColors.copyright}">Copyright bit</th>
-                                            <th scope="colgroup" colspan="1"  class="d-none text-center text-monospace bg-${_fieldColors.original}">Home (original bit)</th>
-                                            <th scope="colgroup" colspan="2"  class="d-none text-center text-monospace bg-${_fieldColors.emphasis}">Emphasis</th>
-                                        </tr>
-                                        <tr class="mp3-binary" ${_valRowsShown.binary ? "" : "hidden"}>
-                                            <td class="text-center text-monospace bg-${_fieldColors.sync}">1</td>
-                                            <td class="text-center text-monospace bg-${_fieldColors.sync}">1</td>
-                                            <td class="text-center text-monospace bg-${_fieldColors.sync}">1</td>
-                                            <td class="text-center text-monospace bg-${_fieldColors.sync}">1</td>
-                                            <td class="text-center text-monospace bg-${_fieldColors.sync}">1</td>
-                                            <td class="text-center text-monospace bg-${_fieldColors.sync}">1</td>
-                                            <td class="text-center text-monospace bg-${_fieldColors.sync}">1</td>
-                                            <td class="text-center text-monospace bg-${_fieldColors.sync}">1</td>
-                                            <td class="text-center text-monospace bg-${_fieldColors.sync}">1</td>
-                                            <td class="text-center text-monospace bg-${_fieldColors.sync}">1</td>
-                                            <td class="text-center text-monospace bg-${_fieldColors.sync}">1</td>
-                                            <td class="text-center text-monospace bg-${_fieldColors.version}">${hdr.version.toString(2)[0]}</td>
-                                            <td class="text-center text-monospace bg-${_fieldColors.version}">${hdr.version.toString(2)[1]}</td>
-                                            <td class="text-center text-monospace bg-${_fieldColors.layer}">${hdr.layer.toString(2).padStart(2, "0")[0]}</td>
-                                            <td class="text-center text-monospace bg-${_fieldColors.layer}">${hdr.layer.toString(2).padStart(2, "0")[1]}</td>
-                                            <td class="text-center text-monospace bg-${_fieldColors.protected}">${hdr.protected ? "1": "0"}</td>
-                                            <td class="text-center text-monospace bg-${_fieldColors.bitRate}">${hdr.bitRate.index.toString(2)[0]}</td>
-                                            <td class="text-center text-monospace bg-${_fieldColors.bitRate}">${hdr.bitRate.index.toString(2)[1]}</td>
-                                            <td class="text-center text-monospace bg-${_fieldColors.bitRate}">${hdr.bitRate.index.toString(2)[2]}</td>
-                                            <td class="text-center text-monospace bg-${_fieldColors.bitRate}">${hdr.bitRate.index.toString(2)[3]}</td>
-                                            <td class="text-center text-monospace bg-${_fieldColors.sampleRate}">${hdr.sampleRate.index.toString(2).padStart(2, "0")[0]}</td>
-                                            <td class="text-center text-monospace bg-${_fieldColors.sampleRate}">${hdr.sampleRate.index.toString(2).padStart(2, "0")[1]}</td>
-                                            <td class="text-center text-monospace bg-${_fieldColors.padding}">${hdr.padding ? "1": "0"}</td>
-                                            <td class="text-center text-monospace bg-${_fieldColors.private}">${hdr.private ? "1": "0"}</td>
-                                            <td class="text-center text-monospace bg-${_fieldColors.channelMode}">${hdr.channelMode.toString(2).padStart(2, "0")[0]}</td>
-                                            <td class="text-center text-monospace bg-${_fieldColors.channelMode}">${hdr.channelMode.toString(2).padStart(2, "0")[1]}</td>
-                                            <td class="text-center text-monospace bg-${_fieldColors.intensityStereoOn}">${hdr.modeExtension.intensityStereoOn ? "1" : "0"}</td>
-                                            <td class="text-center text-monospace bg-${_fieldColors.msStereoOn}">${hdr.modeExtension.msStereoOn ? "1" : "0"}</td>
-                                            <td class="text-center text-monospace bg-${_fieldColors.copyright}">${hdr.copyright ? "1": "0"}</td>
-                                            <td class="text-center text-monospace bg-${_fieldColors.original}">${hdr.original ? "1": "0"}</td>
-                                            <td class="text-center text-monospace bg-${_fieldColors.emphasis}">${hdr.emphasis.toString(2).padStart(2, "0")[0]}</td>
-                                            <td class="text-center text-monospace bg-${_fieldColors.emphasis}">${hdr.emphasis.toString(2).padStart(2, "0")[1]}</td>
-                                        </tr>
-                                        <tr class="mp3-meaning" ${_valRowsShown.meaning ? "" : "hidden"}>
-                                            <td colspan="11" class="text-center text-monospace bg-${_fieldColors.sync}">Synchronized</td>
-                                            <td colspan="2"  class="text-center text-monospace bg-${_fieldColors.version}">${hdrStrs.version}</td>
-                                            <td colspan="2"  class="text-center text-monospace bg-${_fieldColors.layer}">${hdrStrs.layer}</td>
-                                            <td colspan="1"  class="text-center text-monospace bg-${_fieldColors.protected}">${hdrStrs.protected}</td>
-                                            <td colspan="4"  class="text-center text-monospace bg-${_fieldColors.bitRate}">${hdrStrs.bitRate}</td>
-                                            <td colspan="2"  class="text-center text-monospace bg-${_fieldColors.sampleRate}">${hdrStrs.sampleRate}</td>
-                                            <td colspan="1"  class="text-center text-monospace bg-${_fieldColors.padding}">${hdrStrs.padding}</td>
-                                            <td colspan="1"  class="text-center text-monospace bg-${_fieldColors.private}">${hdrStrs.private}</td>
-                                            <td colspan="2"  class="text-center text-monospace bg-${_fieldColors.channelMode}">${hdrStrs.channelMode}</td>
-                                            <td colspan="1"  class="text-center text-monospace bg-${_fieldColors.intensityStereoOn}">${hdrStrs.modeExtension.intensityStereoOn}</td>
-                                            <td colspan="1"  class="text-center text-monospace bg-${_fieldColors.msStereoOn}">${hdrStrs.modeExtension.msStereoOn}</td>
-                                            <td colspan="1"  class="text-center text-monospace bg-${_fieldColors.copyright}">${hdrStrs.copyright}</td>
-                                            <td colspan="1"  class="text-center text-monospace bg-${_fieldColors.original}">${hdrStrs.original}</td>
-                                            <td colspan="2"  class="text-center text-monospace bg-${_fieldColors.emphasis}">${hdrStrs.emphasis}</td>
-                                        </tr>
-                                        <tr class="mp3-hex" ${_valRowsShown.hex ? "" : "hidden"}>
-                                            <td colspan="11" class="text-center text-monospace bg-${_fieldColors.sync}">0x7FF</td>
-                                            <td colspan="2"  class="text-center text-monospace bg-${_fieldColors.version}">0x${hdr.version.toString(16)}</td>
-                                            <td colspan="2"  class="text-center text-monospace bg-${_fieldColors.layer}">0x${hdr.layer.toString(16)}</td>
-                                            <td colspan="1"  class="text-center text-monospace bg-${_fieldColors.protected}">0x${hdr.protected ? "1" : "0"}</td>
-                                            <td colspan="4"  class="text-center text-monospace bg-${_fieldColors.bitRate}">0x${hdr.bitRate.index.toString(16)}</td>
-                                            <td colspan="2"  class="text-center text-monospace bg-${_fieldColors.sampleRate}">0x${hdr.sampleRate.index.toString(16)}</td>
-                                            <td colspan="1"  class="text-center text-monospace bg-${_fieldColors.padding}">0x${hdr.padding ? "1" : "0"}</td>
-                                            <td colspan="1"  class="text-center text-monospace bg-${_fieldColors.private}">0x${hdr.private ? "1" : "0"}</td>
-                                            <td colspan="2"  class="text-center text-monospace bg-${_fieldColors.channelMode}">0x${hdr.channelMode.toString(16)}</td>
-                                            <td colspan="1"  class="text-center text-monospace bg-${_fieldColors.intensityStereoOn}">0x${hdr.modeExtension.intensityStereoOn ? "1" : "0"}</td>
-                                            <td colspan="1"  class="text-center text-monospace bg-${_fieldColors.msStereoOn}">0x${hdr.modeExtension.msStereoOn ? "1" : "0"}</td>
-                                            <td colspan="1"  class="text-center text-monospace bg-${_fieldColors.copyright}">0x${hdr.copyright ? "1" : "0"}</td>
-                                            <td colspan="1"  class="text-center text-monospace bg-${_fieldColors.original}">0x${hdr.original ? "1" : "0"}</td>
-                                            <td colspan="2"  class="text-center text-monospace bg-${_fieldColors.emphasis}">0x${hdr.emphasis.toString(16)}</td>
-                                        </tr>
-                                        <tr class="mp3-decimal" ${_valRowsShown.decimal ? "" : "hidden"}>
-                                            <td colspan="11" class="text-center text-monospace bg-${_fieldColors.sync}">2047</td>
-                                            <td colspan="2"  class="text-center text-monospace bg-${_fieldColors.version}">${hdr.version.toString(10)}</td>
-                                            <td colspan="2"  class="text-center text-monospace bg-${_fieldColors.layer}">${hdr.layer.toString(10)}</td>
-                                            <td colspan="1"  class="text-center text-monospace bg-${_fieldColors.protected}">${hdr.protected ? "1" : "0"}</td>
-                                            <td colspan="4"  class="text-center text-monospace bg-${_fieldColors.bitRate}">${hdr.bitRate.index.toString(10)}</td>
-                                            <td colspan="2"  class="text-center text-monospace bg-${_fieldColors.sampleRate}">${hdr.sampleRate.index.toString(10)}</td>
-                                            <td colspan="1"  class="text-center text-monospace bg-${_fieldColors.padding}">${hdr.padding ? "1" : "0"}</td>
-                                            <td colspan="1"  class="text-center text-monospace bg-${_fieldColors.private}">${hdr.private ? "1" : "0"}</td>
-                                            <td colspan="2"  class="text-center text-monospace bg-${_fieldColors.channelMode}">${hdr.channelMode.toString(10)}</td>
-                                            <td colspan="1"  class="text-center text-monospace bg-${_fieldColors.intensityStereoOn}">${hdr.modeExtension.intensityStereoOn ? "1" : "0"}</td>
-                                            <td colspan="1"  class="text-center text-monospace bg-${_fieldColors.msStereoOn}">${hdr.modeExtension.msStereoOn ? "1" : "0"}</td>
-                                            <td colspan="1"  class="text-center text-monospace bg-${_fieldColors.copyright}">${hdr.copyright ? "1" : "0"}</td>
-                                            <td colspan="1"  class="text-center text-monospace bg-${_fieldColors.original}">${hdr.original ? "1" : "0"}</td>
-                                            <td colspan="2"  class="text-center text-monospace bg-${_fieldColors.emphasis}">${hdr.emphasis.toString(10)}</td>
-                                        </tr>
+                                        <tr>${valColHdrs}</tr>
+                                        <tr class="mp3-binary" ${_valRowsShown.binary ? "" : "hidden"}>${binaryValCells}</tr>
+                                        <tr class="mp3-meaning" ${_valRowsShown.meaning ? "" : "hidden"}>${valMeaningCells}</tr>
+                                        <tr class="mp3-hex" ${_valRowsShown.hex ? "" : "hidden"}>${hexValCells}</tr>
+                                        <tr class="mp3-decimal" ${_valRowsShown.decimal ? "" : "hidden"}>${decimalValCells}</tr>
                                     </table>
                                 </div>
                             </td>
