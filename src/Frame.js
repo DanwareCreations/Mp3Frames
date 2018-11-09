@@ -31,8 +31,8 @@ let Frame;
                 channelMode:     (bits & 0b00000000000000000000000011000000) >> 6,
                 modeExtension: {
                     bits:        (bits & 0b00000000000000000000000000110000) >> 4,
-                    msStereoOn: undefined,
-                    intensityStereoOn: undefined
+                    intensityStereoOn: undefined,
+                    msStereoOn: undefined
                 },
                 copyright:       (bits & 0b00000000000000000000000000001000) >> 3,
                 original:        (bits & 0b00000000000000000000000000000100) >> 2,
@@ -100,18 +100,18 @@ let Frame;
             const hdrStrs = {
                 version:       "?",
                 layer:         "?",
-                protected:     hdr.protected ? "Y" : "N",
+                protected:     hdr.protected ? "true" : "false",
                 bitRate:       `${hdr.bitRate.value.toLocaleString()} kbps`,
                 sampleRate:    `${hdr.sampleRate.value.toLocaleString()} Hz`,
-                padding:       hdr.padding ? "padding" : "no padding",
-                private:       hdr.private ? "private" : "not private",
+                padding:       hdr.padding ? "true" : "false",
+                private:       hdr.private ? "true" : "false",
                 channelMode:   "?",
                 modeExtension: {
-                    msStereoOn: "N/A",
-                    intensityStereoOn: "N/A"
+                    intensityStereoOn: "N/A",
+                    msStereoOn: "N/A"
                 },
-                copyright:     hdr.copyright ? "copyright" : "no copyright",
-                original:      hdr.original ? "original" : "not original",
+                copyright:     hdr.copyright ? "true" : "false",
+                original:      hdr.original ? "true" : "false",
                 emphasis:      "?",
             };
 
@@ -125,11 +125,11 @@ let Frame;
 
             // Stringify Layer
             if (hdr.layer === Frame.Layer.I)
-                hdrStrs.layer = "I";
+                hdrStrs.layer = "Layer I";
             else if (hdr.layer === Frame.Layer.II)
-                hdrStrs.layer = "II";
+                hdrStrs.layer = "Layer II";
             else if (hdr.layer === Frame.Layer.III)
-                hdrStrs.layer = "III";
+                hdrStrs.layer = "Layer III";
 
             // Stringify Channel Mode
             if (hdr.channelMode === Frame.ChannelMode.Stereo)
@@ -143,8 +143,8 @@ let Frame;
 
             // Stringify Mode Extensions
             if (!this.isMono) {
-                hdrStrs.modeExtension.msStereoOn = hdr.modeExtension.msStereoOn ? "Y" : "N";
-                hdrStrs.modeExtension.intensityStereoOn = hdr.modeExtension.intensityStereoOn ? "Y" : "N";
+                hdrStrs.modeExtension.intensityStereoOn = hdr.modeExtension.intensityStereoOn ? "true" : "false";
+                hdrStrs.modeExtension.msStereoOn = hdr.modeExtension.msStereoOn ? "true" : "false";
             }
 
             // Stringify Emphasis
